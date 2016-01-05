@@ -1,0 +1,524 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+
+ This file is part of GtkSourceView
+
+ Author: Mallikarjunarao Kosuri <venkatamallikarjunarao.kosuri@adtran.com>
+ Copyright (C) 2016 Mallikarjunarao Kosuri <venkatamallikarjunarao.kosuri@adtran.com>
+
+ GtkSourceView is free software; you can redistribute it and/or
+ modify it under the terms of the GNU Lesser General Public
+ License as published by the Free Software Foundation; either
+ version 2.1 of the License, or (at your option) any later version.
+
+ GtkSourceView is distributed in the hope that it will be useful,
+ but WITHOUT ANY WARRANTY; without even the implied warranty of
+ MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+ Lesser General Public License for more details.
+
+ You should have received a copy of the GNU Lesser General Public
+ License along with this library; if not, write to the Free Software
+ Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
+
+-->
+
+<language id="robot" _name="Robotframework" version="2.0" _section="Scripts">
+  <metadata>
+    <property name="mimetypes">text/x-robotframework</property>
+    <property name="globs">*.robot</property>
+    <property name="line-comment-start">Comment;#</property>    
+  </metadata>
+  <styles>
+    <style id="module-handler"    _name="Module Handler"         map-to="def:preprocessor"/>
+    <style id="test-settings"     _name="Test settings"          map-to="def:preprocessor"/>
+    <style id="string"            _name="String"                 map-to="def:string"/>
+    <style id="escaped-char"      _name="Escaped Character"      map-to="def:special-char"/>
+    <style id="format"            _name="Format"                 map-to="def:character"/>
+    <style id="variable"          _name="Variable"               map-to="def:type"/>    
+    <style id="builtin-keyword"   _name="Builtin Keywords"       map-to="def:keyword"/>
+    <style id="string-keyword"    _name="String Keywords"        map-to="def:keyword"/>
+    <style id="collections-keyword" _name="Collections Keywords" map-to="def:keyword"/>
+    <style id="telnet-keyword"    _name="Telnet Keywords"        map-to="def:keyword"/>
+    <style id="datetime-keyword"  _name="Date Time Keywords"     map-to="def:keyword"/>
+    <style id="dialog-keyword"    _name="Dialog Keywords"        map-to="def:keyword"/>
+    <style id="os-keyword"        _name="OS Keywords"            map-to="def:keyword"/>
+    <style id="process-keyword"   _name="Process Keywords"       map-to="def:keyword"/>
+    <style id="xml-keyword"       _name="XML Keywords"           map-to="def:keyword"/>
+    <style id="screen-keyword"    _name="Scrrenshot Keywords"    map-to="def:keyword"/>    
+  </styles>
+  <definitions>
+    <context id="module-handler" style-ref="module-handler">
+        <match extended="true" case-sensitive="false">
+            (Library|Suite Setup|Suite Teardown|Documentation|Force Tags|Metadata)
+        </match>            
+    </context>
+    <context id="test-settings" style-ref="test-settings" end-at-line-end="true" class-disabled="no-spell-check">
+        <start>\[</start>
+        <end>\]</end>
+    </context>
+    <define-regex id="identifier">[_a-zA-Z][_a-zA-Z0-9]*</define-regex>
+    <define-regex id="number">[1-9][0-9]*</define-regex>
+
+    <!-- http://docs.python.org/lib/typesseq-strings.html -->
+    <context id="format" style-ref="format" extend-parent="false">
+      <match extended="true" case-sensitive="false">
+        %                       # leading % sign
+        \(\%{identifier}\)?     # mapping key
+        [#0\-\ \+]*             # conversion flags
+        (\-?\%{number}|\*)?     # minimum field width
+        (\.(\-?\%{number}|\*))? # precision
+        (hlL)?                  # lentgh modifier
+        [diouxXeEfFgGcrs%]      # conversion type
+      </match>
+    </context>
+
+    <!-- http://docs.python.org/ref/strings.html -->
+    <context id="escaped-char" style-ref="escaped-char" extend-parent="true">
+      <match extended="true" case-sensitive="false">
+        \\(                 # leading backslash
+        [\\'"abfnrtv]     | # single escaped char
+        N\{[A-Z\ ]+\}     | # named unicode character
+        u[0-9A-Fa-f]{4}   | # xxxx - character with 16-bit hex value xxxx
+        U[0-9A-Fa-f]{8}   | # xxxxxxxx - character with 32-bit hex value xxxxxxxx
+        x[0-9A-Fa-f]{1,2} | # \xhh - character with hex value hh
+        [0-7]{1,3}          # \ooo - character with octal value ooo
+        )
+      </match>
+    </context>
+    <define-regex id="string-prefix">(u|U)?</define-regex>
+    <define-regex id="raw-string-prefix">(r|ur|R|UR|Ur|uR)</define-regex>    
+    <context id="double-quoted-string" style-ref="string" end-at-line-end="true" class="string" class-disabled="no-spell-check">
+      <start>\%{string-prefix}"</start>
+      <end>"</end>
+      <include>
+        <context ref="format"/>
+        <context ref="escaped-char"/>
+        <context ref="def:line-continue"/>
+      </include>
+    </context>
+
+    <context id="single-quoted-string" style-ref="string" end-at-line-end="true" class="string" class-disabled="no-spell-check">
+      <start>\%{string-prefix}'</start>
+      <end>'</end>
+      <include>
+        <context ref="format"/>
+        <context ref="escaped-char"/>
+        <context ref="def:line-continue"/>
+      </include>
+    </context>
+    <!--
+        Robot variables
+    -->
+    <context id="variable" style-ref="variable">
+        <start>[\$@&amp;%]\{</start>
+        <end>\}</end>
+    </context>
+    <!--
+        Robot Keywords
+    -->
+    <context id="builtin-keyword" style-ref="builtin-keyword">
+        <!--
+            Library version: 3.0
+            Last modified: 03 Jan 2016
+        -->
+        <keyword>Run Keyword If</keyword>
+        <keyword>Evaluate</keyword>
+        <keyword>Should Be True</keyword>
+        <keyword>Should Not Be True</keyword>
+        <keyword>Should Be Equal</keyword>
+        <keyword>Should Not Be Equal</keyword>
+        <keyword>Call Method</keyword>
+        <keyword>Catenate</keyword>
+        <keyword>Comment</keyword>
+        <keyword>Continue For Loop</keyword>
+        <keyword>Continue For Loop If</keyword>
+        <keyword>Convert To Binary</keyword>
+        <keyword>Convert To Boolean</keyword>
+        <keyword>Convert To Bytes</keyword>
+        <keyword>Convert To Hex</keyword>
+        <keyword>Convert To Integer</keyword>
+        <keyword>Convert To Number</keyword>
+        <keyword>Convert To Octal</keyword>
+        <keyword>Convert To String</keyword>
+        <keyword>Create Dictionary</keyword>
+        <keyword>Create List</keyword>
+        <keyword>Evaluate</keyword>
+        <keyword>Exit For Loop</keyword>
+        <keyword>Exit For Loop If</keyword>
+        <keyword>Fail</keyword>
+        <keyword>Fatal Error</keyword>
+        <keyword>Get Count</keyword>
+        <keyword>Get Length</keyword>
+        <keyword>Get Library Instance</keyword>
+        <keyword>Get Time</keyword>
+        <keyword>Get Variable Value</keyword>
+        <keyword>Get Variables</keyword>
+        <keyword>Import Library</keyword>
+        <keyword>Import Resource</keyword>
+        <keyword>Import Variables</keyword>
+        <keyword>Keyword Should Exist</keyword>
+        <keyword>Length Should Be</keyword>
+        <keyword>Log</keyword>
+        <keyword>Log Many</keyword>
+        <keyword>Log To Console</keyword>
+        <keyword>Log Variables</keyword>
+        <keyword>No Operation</keyword>
+        <keyword>Pass Execution</keyword>
+        <keyword>Pass Execution If</keyword>
+        <keyword>Regexp Escape</keyword>
+        <keyword>Reload Library</keyword>
+        <keyword>Remove Tags</keyword>
+        <keyword>Repeat Keyword</keyword>
+        <keyword>Replace Variables</keyword>
+        <keyword>Return From Keyword</keyword>
+        <keyword>Return From Keyword If</keyword>
+        <keyword>Run Keyword</keyword>
+        <keyword>Run Keyword And Continue On Failure</keyword>
+        <keyword>Run Keyword And Expect Error</keyword>
+        <keyword>Run Keyword And Ignore Error</keyword>
+        <keyword>Run Keyword And Return</keyword>
+        <keyword>Run Keyword And Return If</keyword>
+        <keyword>Run Keyword And Return Status</keyword>
+        <keyword>Run Keyword If</keyword>
+        <keyword>Run Keyword If All Critical Tests Passed</keyword>
+        <keyword>Run Keyword If All Tests Passed</keyword>
+        <keyword>Run Keyword If Any Critical Tests Failed</keyword>
+        <keyword>Run Keyword If Any Tests Failed</keyword>
+        <keyword>Run Keyword If Test Failed</keyword>
+        <keyword>Run Keyword If Test Passed</keyword>
+        <keyword>Run Keyword If Timeout Occurred</keyword>
+        <keyword>Run Keyword Unless</keyword>
+        <keyword>Run Keywords</keyword>
+        <keyword>Set Global Variable</keyword>
+        <keyword>Set Library Search Order</keyword>
+        <keyword>Set Log Level</keyword>
+        <keyword>Set Suite Documentation</keyword>
+        <keyword>Set Suite Metadata</keyword>
+        <keyword>Set Suite Variable</keyword>
+        <keyword>Set Tags</keyword>
+        <keyword>Set Test Documentation</keyword>
+        <keyword>Set Test Message</keyword>
+        <keyword>Set Test Variable</keyword>
+        <keyword>Set Variable</keyword>
+        <keyword>Set Variable If</keyword>
+        <keyword>Should Be Empty</keyword>
+        <keyword>Should Be Equal</keyword>
+        <keyword>Should Be Equal As Integers</keyword>
+        <keyword>Should Be Equal As Numbers</keyword>
+        <keyword>Should Be Equal As Strings</keyword>
+        <keyword>Should Be True</keyword>
+        <keyword>Should Contain</keyword>
+        <keyword>Should Contain X Times</keyword>
+        <keyword>Should End With</keyword>
+        <keyword>Should Match</keyword>
+        <keyword>Should Match Regexp</keyword>
+        <keyword>Should Not Be Empty</keyword>
+        <keyword>Should Not Be Equal</keyword>
+        <keyword>Should Not Be Equal As Integers</keyword>
+        <keyword>Should Not Be Equal As Numbers</keyword>
+        <keyword>Should Not Be Equal As Strings</keyword>
+        <keyword>Should Not Be True</keyword>
+        <keyword>Should Not Contain</keyword>
+        <keyword>Should Not End With</keyword>
+        <keyword>Should Not Match</keyword>
+        <keyword>Should Not Match Regexp</keyword>
+        <keyword>Should Not Start With</keyword>
+        <keyword>Should Start With</keyword>
+        <keyword>Sleep</keyword>
+        <keyword>Variable Should Exist</keyword>
+        <keyword>Variable Should Not Exist</keyword>
+        <keyword>Wait Until Keyword Succeeds</keyword>
+    </context>
+    <context id="string-keyword" style-ref="string-keyword">
+        <!--
+            Library version: 3.0
+            Last modified: 03 Jan 2016
+        -->
+        <keyword>Convert To Lowercase</keyword>
+        <keyword>Convert To Uppercase</keyword>
+        <keyword>Decode Bytes To String</keyword>
+        <keyword>Encode String To Bytes</keyword>
+        <keyword>Fetch From Left</keyword>
+        <keyword>Fetch From Right</keyword>
+        <keyword>Generate Random String </keyword>
+        <keyword>Get Line </keyword>
+        <keyword>Get Line Count </keyword>
+        <keyword>Get Lines Containing String </keyword>
+        <keyword>Get Lines Matching Pattern </keyword>
+        <keyword>Get Lines Matching Regexp </keyword>
+        <keyword>Get Regexp Matches </keyword>
+        <keyword>Get Substring</keyword>
+        <keyword>Remove String</keyword>
+        <keyword>Remove String Using Regexp</keyword>
+        <keyword>Replace String</keyword>
+        <keyword>Replace String Using Regexp</keyword>
+        <keyword>Should Be Byte String</keyword>
+        <keyword>Should Be Lowercase</keyword>
+        <keyword>Should Be String</keyword>
+        <keyword>Should Be Titlecase</keyword>
+        <keyword>Should Be Unicode String</keyword>
+        <keyword>Should Be Uppercase</keyword>
+        <keyword>Should Not Be String</keyword>
+        <keyword>Split String</keyword>
+        <keyword>Split String From Right</keyword>
+        <keyword>Split String To Characters</keyword>
+        <keyword>Split To Lines</keyword>
+    </context>
+    <context id="collections-keyword" style-ref="collections-keyword">
+        <!--
+            Library version: 3.0
+            Last modified: 03 Jan 2016
+        -->
+        <keyword>Append To List</keyword>
+        <keyword>Combine Lists</keyword>
+        <keyword>Convert To Dictionary </keyword>
+        <keyword>Convert To List </keyword>
+        <keyword>Copy Dictionary </keyword>
+        <keyword>Copy List </keyword>
+        <keyword>Count Values In List </keyword>
+        <keyword>Dictionaries Should Be Equal </keyword>
+        <keyword>Dictionary Should Contain Item </keyword>
+        <keyword>Dictionary Should Contain Key </keyword>
+        <keyword>Dictionary Should Contain Sub Dictionary </keyword>
+        <keyword>Dictionary Should Contain Value </keyword>
+        <keyword>Dictionary Should Not Contain Key </keyword>
+        <keyword>Dictionary Should Not Contain Value </keyword>
+        <keyword>Get Dictionary Items </keyword>
+        <keyword>Get Dictionary Keys </keyword>
+        <keyword>Get Dictionary Values </keyword>
+        <keyword>Get From Dictionary </keyword>
+        <keyword>Get From List </keyword>
+        <keyword>Get Index From List </keyword>
+        <keyword>Get Match Count </keyword>
+        <keyword>Get Matches </keyword>
+        <keyword>Get Slice From List </keyword>
+        <keyword>Insert Into List </keyword>
+        <keyword>Keep In Dictionary </keyword>
+        <keyword>List Should Contain Sub List </keyword>
+        <keyword>List Should Contain Value </keyword>
+        <keyword>List Should Not Contain Duplicates </keyword>
+        <keyword>List Should Not Contain Value </keyword>
+        <keyword>Lists Should Be Equal </keyword>
+        <keyword>Log Dictionary </keyword>
+        <keyword>Log List </keyword>
+        <keyword>Pop From Dictionary </keyword>
+        <keyword>Remove Duplicates </keyword>
+        <keyword>Remove From Dictionary </keyword>
+        <keyword>Remove From List </keyword>
+        <keyword>Remove Values From List </keyword>
+        <keyword>Reverse List </keyword>
+        <keyword>Set List Value </keyword>
+        <keyword>Set To Dictionary </keyword>
+        <keyword>Should Contain Match </keyword>
+        <keyword>Should Not Contain Match </keyword>
+        <keyword>Sort List </keyword>
+    </context>
+    <context id="telnet-keyword" style-ref="telnet-keyword">
+        <!--
+            Library version: 3.0
+            Last modified: 03 Jan 2016
+        -->
+        <keyword>Close All Connections</keyword>
+        <keyword>Close Connection</keyword>
+        <keyword>Execute Command</keyword>
+        <keyword>Login</keyword>
+        <keyword>Open Connection</keyword>
+        <keyword>Read</keyword>
+        <keyword>Read Until</keyword>
+        <keyword>Read Until Prompt</keyword>
+        <keyword>Read Until Regexp</keyword>
+        <keyword>Set Default Log Level</keyword>
+        <keyword>Set Encoding</keyword>
+        <keyword>Set Newline</keyword>
+        <keyword>Set Prompt</keyword>
+        <keyword>Set Telnetlib Log Level</keyword>
+        <keyword>Set Timeout</keyword>
+        <keyword>Switch Connection</keyword>
+        <keyword>Write</keyword>
+        <keyword>Write Bare</keyword>
+        <keyword>Write Control Character</keyword>
+        <keyword>Write Until Expected Output</keyword>
+    </context>
+    <context id="datetime-keyword" style-ref="datetime-keyword">        
+        <!--
+            Library version: 3.0
+            Last modified: 03 Jan 2016
+        -->
+        <keyword>Add Time To Time</keyword>
+        <keyword>Convert Date</keyword>
+        <keyword>Convert Time</keyword>
+        <keyword>Get Current Date</keyword>
+        <keyword>Subtract Date From Date</keyword>
+        <keyword>Subtract Time From Date</keyword>
+        <keyword>Subtract Time From Time </keyword>
+    </context>
+    <context id="dialog-keyword" style-ref="dialog-keyword">
+        <!--
+            Library version: 3.0
+            Last modified: 03 Jan 2016
+        -->
+        <keyword>Execute Manual Step</keyword>        
+        <keyword>Get Selection From User</keyword>
+        <keyword>Get Value From User</keyword>
+        <keyword>Pause Execution </keyword>
+    </context>
+    <context id="os-keyword" style-ref="os-keyword">
+         <!--
+            Library version: 3.0
+            Last modified: 03 Jan 2016
+        -->
+        <keyword>Append To Environment Variable</keyword>
+        <keyword>Append To File</keyword>
+        <keyword>Copy Directory</keyword>
+        <keyword>Copy File</keyword>
+        <keyword>Copy Files</keyword>
+        <keyword>Count Directories In Directory</keyword>
+        <keyword>Count Files In Directory</keyword>
+        <keyword>Count Items In Directory</keyword>
+        <keyword>Create Binary File</keyword>
+        <keyword>Create Directory</keyword>
+        <keyword>Create File</keyword>
+        <keyword>Directory Should Be Empty</keyword>
+        <keyword>Directory Should Exist</keyword>
+        <keyword>Directory Should Not Be Empty</keyword>
+        <keyword>Directory Should Not Exist</keyword>
+        <keyword>Empty Directory</keyword>
+        <keyword>Environment Variable Should Be Set</keyword>
+        <keyword>Environment Variable Should Not Be Set</keyword>
+        <keyword>File Should Be Empty</keyword>
+        <keyword>File Should Exist</keyword>
+        <keyword>File Should Not Be Empty</keyword>
+        <keyword>File Should Not Exist</keyword>
+        <keyword>Get Binary File</keyword>
+        <keyword>Get Environment Variable</keyword>
+        <keyword>Get Environment Variables</keyword>
+        <keyword>Get File</keyword>
+        <keyword>Get File Size</keyword>
+        <keyword>Get Modified Time</keyword>
+        <keyword>Grep File</keyword>
+        <keyword>Join Path</keyword>
+        <keyword>Join Paths</keyword>
+        <keyword>List Directories In Directory</keyword>
+        <keyword>List Directory</keyword>
+        <keyword>List Files In Directory</keyword>
+        <keyword>Log Environment Variables</keyword>
+        <keyword>Log File</keyword>
+        <keyword>Move Directory</keyword>
+        <keyword>Move File</keyword>
+        <keyword>Move Files</keyword>
+        <keyword>Normalize Path</keyword>
+        <keyword>Read Process Output</keyword>
+        <keyword>Remove Directory</keyword>
+        <keyword>Remove Environment Variable</keyword>
+        <keyword>Remove File</keyword>
+        <keyword>Remove Files</keyword>
+        <keyword>Run</keyword>
+        <keyword>Run And Return Rc</keyword>
+        <keyword>Run And Return Rc And Output</keyword>
+        <keyword>Set Environment Variable</keyword>
+        <keyword>Set Modified Time</keyword>
+        <keyword>Should Exist</keyword>
+        <keyword>Should Not Exist</keyword>
+        <keyword>Split Extension</keyword>
+        <keyword>Split Path</keyword>
+        <keyword>Start Process</keyword>
+        <keyword>Stop All Processes</keyword>
+        <keyword>Stop Process</keyword>
+        <keyword>Switch Process</keyword>
+        <keyword>Touch</keyword>
+        <keyword>Wait Until Created</keyword>
+        <keyword>Wait Until Removed </keyword>
+    </context>
+    <context id="process-keyword" style-ref="process-keyword">
+        <!--
+            Library version: 3.0
+            Last modified: 03 Jan 2016
+        -->
+        <keyword>Get Process Id</keyword>
+        <keyword>Get Process Object</keyword>
+        <keyword>Get Process Result</keyword>
+        <keyword>Is Process Running</keyword>
+        <keyword>Join Command Line</keyword>
+        <keyword>Process Should Be Running</keyword>
+        <keyword>Process Should Be Stopped</keyword>
+        <keyword>Run Process</keyword>
+        <keyword>Send Signal To Process</keyword>
+        <keyword>Split Command Line</keyword>
+        <keyword>Start Process</keyword>
+        <keyword>Switch Process</keyword>
+        <keyword>Terminate All Processes</keyword>
+        <keyword>Terminate Process</keyword>
+        <keyword>Wait For Process </keyword>
+    </context>
+    <context id="xml-keyword" style-ref="xml-keyword">
+        <!--
+            Library version: 3.0
+            Last modified: 03 Jan 2016
+        -->
+        <keyword>Add Element</keyword>
+        <keyword>Clear Element</keyword>
+        <keyword>Copy Element</keyword>
+        <keyword>Element Attribute Should Be</keyword>
+        <keyword>Element Attribute Should Match</keyword>
+        <keyword>Element Should Exist</keyword>
+        <keyword>Element Should Not Exist</keyword>
+        <keyword>Element Should Not Have Attribute</keyword>
+        <keyword>Element Text Should Be</keyword>
+        <keyword>Element Text Should Match</keyword>
+        <keyword>Element To String</keyword>
+        <keyword>Elements Should Be Equal</keyword>
+        <keyword>Elements Should Match</keyword>
+        <keyword>Evaluate Xpath</keyword>
+        <keyword>Get Child Elements</keyword>
+        <keyword>Get Element</keyword>
+        <keyword>Get Element Attribute</keyword>
+        <keyword>Get Element Attributes</keyword>
+        <keyword>Get Element Count</keyword>
+        <keyword>Get Element Text</keyword>
+        <keyword>Get Elements</keyword>
+        <keyword>Get Elements Texts</keyword>
+        <keyword>Log Element</keyword>
+        <keyword>Parse Xml</keyword>
+        <keyword>Remove Element</keyword>
+        <keyword>Remove Element Attribute</keyword>
+        <keyword>Remove Element Attributes</keyword>
+        <keyword>Remove Elements</keyword>
+        <keyword>Remove Elements Attribute</keyword>
+        <keyword>Remove Elements Attributes</keyword>
+        <keyword>Save Xml</keyword>
+        <keyword>Set Element Attribute</keyword>
+        <keyword>Set Element Tag</keyword>
+        <keyword>Set Element Text</keyword>
+        <keyword>Set Elements Attribute</keyword>
+        <keyword>Set Elements Tag</keyword>
+        <keyword>Set Elements Text</keyword>
+    </context>
+    <context id="screen-keyword" style-ref="screen-keyword">
+        <!--
+            Library version: 3.0
+            Last modified: 03 Jan 2016
+        -->
+        <keyword>Set Screenshot Directory</keyword>
+        <keyword>Take Screenshot</keyword>
+        <keyword>Take Screenshot Without Embedding</keyword>
+    </context>
+    <context id="robot" class="no-spell-check">
+      <include>
+        <context ref="module-handler"/>
+        <context ref="test-settings"/>
+        <context ref="double-quoted-string"/>
+        <context ref="single-quoted-string"/>
+        <context ref="builtin-keyword"/>
+        <context ref="string-keyword"/>
+        <context ref="collections-keyword"/>
+        <context ref="telnet-keyword"/>
+        <context ref="datetime-keyword"/>
+        <context ref="os-keyword"/>
+        <context ref="process-keyword"/>
+        <context ref="xml-keyword"/>
+        <context ref="screen-keyword"/>  
+        <context ref="variable"/>  
+      </include>
+    </context>
+  </definitions>
+</language>
