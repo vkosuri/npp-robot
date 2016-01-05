@@ -1,3 +1,8 @@
+<!--
+ Author: Mallikarjunarao Kosuri <venkatamallikarjunarao.kosuri@adtran.com>
+ Copyright (C) 2016 Mallikarjunarao Kosuri <venkatamallikarjunarao.kosuri@adtran.com>
+-->
+
 <NotepadPlus>
     <UserLang name="Robotframework" ext="robot" udlVersion="2.1">
         <Settings>
