@@ -1,6 +1,6 @@
 # lang-robot
 
-Robotframework syntax highlighting for **GEdit** and **Notepad++**
+Robotframework syntax highlighter for **Notepad++**
 
 ## Notepad++
 
@@ -26,5 +26,7 @@ Green - Comments
 
 ![syntax-highlighter](https://cloud.githubusercontent.com/assets/13664257/12018694/650545a2-ad8c-11e5-8bf2-52719ab60f0a.png)
 
+
+**After import the syntax will work .robot files only**
 
 Enjoy...
